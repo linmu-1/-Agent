@@ -1,0 +1,18 @@
+.indicator {
+  align-items: center;
+  display: flex;
+  height: 72px;
+  justify-content: center;
+  width: 72px;
+}
+
+.indicatorInner {
+  height: 72px;
+  width: 72px;
+}
+
+.indicatorInner :global(svg) {
+  display: block;
+  height: 72px !important;
+  width: 72px !important;
+}

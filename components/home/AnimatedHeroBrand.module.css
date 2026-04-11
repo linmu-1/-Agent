@@ -1,0 +1,17 @@
+.brand {
+  display: inline-flex;
+  height: 65px;
+  justify-content: center;
+  width: 268px;
+}
+
+.animationLayer {
+  height: 65px;
+  width: 268px;
+}
+
+.animationLayer :global(svg) {
+  display: block;
+  height: 65px !important;
+  width: 268px !important;
+}
