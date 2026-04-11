@@ -273,7 +273,18 @@ function UploadPanel() {
         : "idle";
 
   const openPicker = () => {
-    inputRef.current?.click();
+    const input = inputRef.current;
+
+    if (!input) {
+      return;
+    }
+
+    if (typeof input.showPicker === "function") {
+      input.showPicker();
+      return;
+    }
+
+    input.click();
   };
 
   const handlePrimaryAction = () => {
@@ -408,9 +419,11 @@ function UploadPanel() {
 
         <input
           accept=".doc,.docx"
-          hidden
+          aria-hidden="true"
+          className={styles.fileInput}
           onChange={(event) => onFileSelect(event.target.files?.[0] ?? undefined)}
           ref={inputRef}
+          tabIndex={-1}
           type="file"
         />
       </div>

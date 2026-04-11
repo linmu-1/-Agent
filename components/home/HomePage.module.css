@@ -260,6 +260,16 @@
   font-weight: 500;
 }
 
+.fileInput {
+  height: 1px;
+  left: -9999px;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  top: auto;
+  width: 1px;
+}
+
 .aiPanel {
   display: flex;
   height: 170px;
