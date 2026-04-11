@@ -411,6 +411,12 @@
   gap: 16px;
 }
 
+.projectCardLink {
+  color: inherit;
+  display: block;
+  text-decoration: none;
+}
+
 .projectCard {
   background: #e4e8e9;
   border-radius: var(--card-radius);

@@ -1,11 +1,15 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { featuredWorks, guideCards, projectCards } from "@/data/home";
 import { AnimatedHeroBrand } from "./AnimatedHeroBrand";
 import { UploadLottieIndicator } from "./UploadLottieIndicator";
 import styles from "./HomePage.module.css";
+
+const PROJECT_DETAIL_URL =
+  "https://xyq.jianying.com/novel/detail/script?thread_id=561a118a-fda3-4973-b2e6-71c5b6383ce0";
 
 function SectionHeader({
   title,
@@ -85,50 +89,55 @@ function ProjectCard({
   }, [hovered]);
 
   return (
-    <article
-      className={hovered ? `${styles.projectCard} ${styles.projectCardHovered}` : styles.projectCard}
+    <Link
+      className={styles.projectCardLink}
+      href={PROJECT_DETAIL_URL}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      <div className={styles.projectCardVisual}>
-        <div className={styles.projectGlow} style={{ background: tone }} />
-        <div
-          className={
-            orientation === "portrait"
-              ? styles.projectPosterPortrait
-              : styles.projectPosterLandscape
-          }
-        >
-          {previewVideo ? (
-            <video
-              className={styles.projectVideo}
-              loop
-              muted
-              playsInline
-              poster={cover}
-              preload="metadata"
-              ref={videoRef}
-              src={previewVideo}
+      <article
+        className={hovered ? `${styles.projectCard} ${styles.projectCardHovered}` : styles.projectCard}
+      >
+        <div className={styles.projectCardVisual}>
+          <div className={styles.projectGlow} style={{ background: tone }} />
+          <div
+            className={
+              orientation === "portrait"
+                ? styles.projectPosterPortrait
+                : styles.projectPosterLandscape
+            }
+          >
+            {previewVideo ? (
+              <video
+                className={styles.projectVideo}
+                loop
+                muted
+                playsInline
+                poster={cover}
+                preload="metadata"
+                ref={videoRef}
+                src={previewVideo}
+              />
+            ) : null}
+            <Image
+              alt={title}
+              className={previewVideo ? styles.projectImageWithVideo : undefined}
+              fill
+              priority={priority}
+              sizes="253px"
+              src={cover}
             />
-          ) : null}
-          <Image
-            alt={title}
-            className={previewVideo ? styles.projectImageWithVideo : undefined}
-            fill
-            priority={priority}
-            sizes="253px"
-            src={cover}
-          />
+          </div>
+          <div className={hovered ? `${styles.playButton} ${styles.playButtonHidden}` : styles.playButton}>
+            <span className={styles.playTriangle} />
+          </div>
         </div>
-        <div className={hovered ? `${styles.playButton} ${styles.playButtonHidden}` : styles.playButton}>
-          <span className={styles.playTriangle} />
+        <div className={styles.projectMeta}>
+          <strong>{title}</strong>
+          <span>{createdAt}</span>
         </div>
-      </div>
-      <div className={styles.projectMeta}>
-        <strong>{title}</strong>
-        <span>{createdAt}</span>
-      </div>
-    </article>
+      </article>
+    </Link>
   );
 }
 
@@ -290,6 +299,11 @@ function UploadPanel() {
   const handlePrimaryAction = () => {
     if (activeTab === "ai") {
       aiInputRef.current?.focus();
+      return;
+    }
+
+    if (uploadStage === "complete") {
+      window.location.href = PROJECT_DETAIL_URL;
       return;
     }
 
