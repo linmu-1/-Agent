@@ -257,6 +257,7 @@ function UploadPanel() {
   );
 
   const hasSelectedFile = fileName.length > 0;
+  const displayFileName = fileName.replace(/\.[^/.]+$/, "");
 
   const helperText = useMemo(() => {
     if (uploadStage === "uploading") {
@@ -264,7 +265,7 @@ function UploadPanel() {
     }
 
     if (uploadStage === "complete") {
-      return "真人权谋";
+      return displayFileName || fileName;
     }
 
     if (hasSelectedFile) {
@@ -272,7 +273,7 @@ function UploadPanel() {
     }
 
     return "支持 .docx 格式，可拖拽或点击此处上传";
-  }, [fileName, hasSelectedFile, uploadStage]);
+  }, [displayFileName, fileName, hasSelectedFile, uploadStage]);
 
   const visualStage =
     uploadStage === "uploading" || uploadStage === "complete"
@@ -396,24 +397,26 @@ function UploadPanel() {
             tabIndex={0}
           >
             <div className={styles.dropzoneArt}>
-              <UploadLottieIndicator
-                key={animationResetKey}
-                className={styles.uploadIndicator}
-                onComplete={() => setUploadStage("complete")}
-                stage={visualStage}
-              />
-              {uploadStage === "complete" ? (
-                <button
-                  aria-label="删除已上传文件"
-                  className={styles.uploadResetHotspot}
-                  onClick={(event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    resetUpload();
-                  }}
-                  type="button"
+              <div className={styles.uploadIndicatorWrap}>
+                <UploadLottieIndicator
+                  key={animationResetKey}
+                  className={styles.uploadIndicator}
+                  onComplete={() => setUploadStage("complete")}
+                  stage={visualStage}
                 />
-              ) : null}
+                {uploadStage === "complete" ? (
+                  <button
+                    aria-label="删除已上传文件"
+                    className={styles.uploadResetHotspot}
+                    onClick={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      resetUpload();
+                    }}
+                    type="button"
+                  />
+                ) : null}
+              </div>
               <p className={uploadStage !== "idle" ? styles.dropzoneTextActive : undefined}>{helperText}</p>
             </div>
           </div>
