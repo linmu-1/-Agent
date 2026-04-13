@@ -417,7 +417,16 @@ function UploadPanel() {
                   />
                 ) : null}
               </div>
-              <p className={uploadStage !== "idle" ? styles.dropzoneTextActive : undefined}>{helperText}</p>
+              <p className={uploadStage !== "idle" ? styles.dropzoneTextActive : undefined}>
+                {uploadStage === "idle" ? (
+                  <>
+                    支持 .docx 格式，可拖拽或
+                    <span className={styles.dropzoneUploadLink}>点击此处上传</span>
+                  </>
+                ) : (
+                  helperText
+                )}
+              </p>
             </div>
           </div>
         ) : (
