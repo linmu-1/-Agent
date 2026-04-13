@@ -298,6 +298,11 @@ function UploadPanel() {
 
   const handlePrimaryAction = () => {
     if (activeTab === "ai") {
+      if (!aiPrompt.trim()) {
+        aiInputRef.current?.focus();
+        return;
+      }
+
       aiInputRef.current?.focus();
       return;
     }
@@ -309,6 +314,8 @@ function UploadPanel() {
 
     openPicker();
   };
+
+  const isAiActionDisabled = activeTab === "ai" && !aiPrompt.trim();
 
   const onFileSelect = (file?: File) => {
     if (!file) {
@@ -349,12 +356,18 @@ function UploadPanel() {
           onClick={() => setActiveTab("ai")}
           type="button"
         >
-          <Image alt="" height={18} src="/home/upload-ai.svg" width={18} />
+          <Image alt="" height={16} src="/home/upload-ai.svg" width={16} />
           AI 生成剧本
         </button>
       </div>
 
-      <div className={styles.uploadCard}>
+      <div
+        className={
+          activeTab === "upload"
+            ? `${styles.uploadCard} ${styles.uploadCardUploadActive}`
+            : `${styles.uploadCard} ${styles.uploadCardAiActive}`
+        }
+      >
         {activeTab === "upload" ? (
           <div
             aria-label="上传剧本"
@@ -426,7 +439,12 @@ function UploadPanel() {
               <strong>100</strong> 字符消耗 <strong>2</strong> 积分，实际消耗与最终输出的剧本字符相关
             </p>
           </div>
-          <button className={styles.uploadButton} onClick={handlePrimaryAction} type="button">
+          <button
+            className={isAiActionDisabled ? `${styles.uploadButton} ${styles.uploadButtonDisabled}` : styles.uploadButton}
+            disabled={isAiActionDisabled}
+            onClick={handlePrimaryAction}
+            type="button"
+          >
             {activeTab === "ai" ? "立即创作" : uploadStage === "complete" ? "立即创作" : "上传剧本"}
           </button>
         </div>
@@ -460,7 +478,14 @@ export function HomePage() {
     <main className={styles.page}>
       <div className={styles.canvas}>
         <header className={styles.topNav}>
-          <Image alt="短剧 Agent" height={28} src="/home/top-nav-brand.svg" width={82} />
+          <button
+            aria-label="刷新页面"
+            className={styles.topNavBrandButton}
+            onClick={() => window.location.reload()}
+            type="button"
+          >
+            <Image alt="短剧 Agent" height={28} src="/home/top-nav-brand.svg" width={82} />
+          </button>
 
           <div className={styles.topNavRight}>
             <button className={styles.creditPill} type="button">

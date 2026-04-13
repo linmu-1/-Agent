@@ -25,6 +25,11 @@
   z-index: 20;
 }
 
+.topNavBrandButton {
+  cursor: pointer;
+  display: inline-flex;
+}
+
 .topNavRight {
   align-items: center;
   display: flex;
@@ -46,7 +51,6 @@
 .navIconButton:hover,
 .avatarButton:hover,
 .sectionFilter:hover,
-.iconCircle:hover,
 .uploadButton:hover,
 .guideButton:hover {
   box-shadow: var(--shadow-card);
@@ -135,60 +139,94 @@
 .uploadTabPrimaryActive,
 .uploadTabSecondary,
 .uploadTabSecondaryActive {
-  align-items: flex-start;
+  align-items: center;
   box-sizing: border-box;
   color: var(--text-secondary);
   display: flex;
+  font-weight: 500;
   gap: 4px;
   justify-content: center;
-  padding-top: 12px;
+  overflow: hidden;
+  padding-bottom: 41px;
+  padding-top: 0;
   position: absolute;
   transition: background-color 160ms ease, color 160ms ease;
 }
 
 .uploadTabPrimary,
 .uploadTabPrimaryActive {
-  height: 43px;
+  height: 84px;
   left: 0;
   top: 0;
-  width: 509.5px;
+  width: 473px;
 }
 
 .uploadTabSecondary,
 .uploadTabSecondaryActive {
   height: 84px;
-  left: 357px;
+  left: calc(100% - 473px);
   top: 0;
-  width: 481px;
+  width: 473px;
 }
 
 .uploadTabPrimary {
-  background: #e3eaee;
-  border-radius: 32px;
+  background: transparent;
+  border-radius: 0;
   z-index: 1;
 }
 
 .uploadTabPrimaryActive {
-  background: #f9fbfb;
-  border-radius: 32px 32px 32px 0;
+  background: url("/home/upload-tab-left-active.svg") no-repeat top left / 473px 43px;
+  border-radius: 0;
   color: var(--text-primary);
   z-index: 2;
 }
 
 .uploadTabSecondary {
-  background: #e3eaee;
-  border-radius: 32px;
+  background: transparent;
+  border-radius: 0;
   color: var(--text-secondary);
-  font-weight: 500;
   z-index: 1;
 }
 
 .uploadTabSecondaryActive {
-  background: #f9fbfb;
-  border-radius: 32px 32px 0 32px;
+  background: url("/home/upload-tab-right-active.svg") no-repeat top left / 473px 43px;
+  border-radius: 0;
   color: var(--text-primary);
-  font-weight: 500;
   z-index: 2;
+}
+
+.uploadTabSecondaryActive::after {
+  background: #f9fbfb;
+  content: "";
+  height: 11px;
+  position: absolute;
+  right: 0;
+  top: 32px;
+  width: 32px;
+}
+
+.uploadTabPrimary::before,
+.uploadTabSecondary::before {
+  background: #e3eaee;
+  content: "";
+  inset: 2px 0 0;
+  position: absolute;
+  transition: background-color 160ms ease;
+  z-index: -1;
+}
+
+.uploadTabPrimary::before {
+  border-radius: 32px 32px 0 0;
+}
+
+.uploadTabSecondary::before {
+  border-radius: 32px;
+}
+
+.uploadTabPrimary:hover::before,
+.uploadTabSecondary:hover::before {
+  background: #dae3e9;
 }
 
 .uploadCard {
@@ -199,6 +237,14 @@
   padding: 8px 8px 18px;
   position: relative;
   z-index: 3;
+}
+
+.uploadCardUploadActive {
+  border-radius: 0 32px 32px 32px;
+}
+
+.uploadCardAiActive {
+  border-radius: 32px 0 32px 32px;
 }
 
 .dropzone {
@@ -351,6 +397,11 @@
   height: 33px;
   padding: 0 22px;
   transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.uploadButtonDisabled {
+  cursor: default;
+  opacity: 0.4;
 }
 
 .contentSection {
@@ -651,12 +702,11 @@
   align-items: center;
   background: #fff;
   border-radius: 999px;
-  box-shadow: 0 4px 18px rgba(141, 153, 165, 0.16);
   display: inline-flex;
   font-size: 20px;
   height: 30px;
   justify-content: center;
-  transition: transform 160ms ease, box-shadow 160ms ease;
+  transition: transform 160ms ease;
   width: 30px;
 }
 
