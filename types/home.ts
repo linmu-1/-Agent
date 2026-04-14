@@ -4,6 +4,9 @@ export type ProjectCard = {
   orientation: "portrait" | "landscape";
   cover: string;
   previewVideo?: string;
+  slideshowImages?: string[];
+  posterWidth?: number;
+  posterHeight?: number;
   tone: string;
 };
 

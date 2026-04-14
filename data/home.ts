@@ -12,9 +12,15 @@ export const projectCards: ProjectCard[] = [
   {
     title: "科技行者",
     createdAt: "2026-03-01 12:31",
-    orientation: "landscape",
-    cover: "/home/project-covers/project-2.png",
-    previewVideo: "/home/project-videos/project-2.mp4",
+    orientation: "portrait",
+    cover: "/home/project-tech-stack/1.png",
+    slideshowImages: [
+      "/home/project-tech-stack/1.png",
+      "/home/project-tech-stack/2.png",
+      "/home/project-tech-stack/3.png",
+    ],
+    posterWidth: 135,
+    posterHeight: 180,
     tone: "linear-gradient(180deg, rgba(234,223,178,0.06) 0%, rgba(123,116,77,0.2) 100%)",
   },
   {

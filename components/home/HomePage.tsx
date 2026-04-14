@@ -63,13 +63,34 @@ function ProjectCard({
   orientation,
   cover,
   previewVideo,
+  slideshowImages,
+  posterWidth,
+  posterHeight,
   tone,
   priority = false,
 }: (typeof projectCards)[number] & { priority?: boolean }) {
   const [hovered, setHovered] = useState(false);
+  const [currentSlide, setCurrentSlide] = useState(0);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const hasSlideshow = Boolean(slideshowImages?.length);
 
   useEffect(() => {
+    if (!hovered || !slideshowImages?.length || slideshowImages.length < 2) {
+      return;
+    }
+
+    const intervalId = window.setInterval(() => {
+      setCurrentSlide((previous) => (previous + 1) % slideshowImages.length);
+    }, 850);
+
+    return () => window.clearInterval(intervalId);
+  }, [hovered, slideshowImages]);
+
+  useEffect(() => {
+    if (hasSlideshow) {
+      return;
+    }
+
     const video = videoRef.current;
 
     if (!video) {
@@ -86,14 +107,30 @@ function ProjectCard({
 
     video.pause();
     video.currentTime = 0;
-  }, [hovered]);
+  }, [hasSlideshow, hovered]);
+
+  const displayedCover =
+    hovered && slideshowImages?.length ? slideshowImages[currentSlide] ?? slideshowImages[0] : cover;
+  const posterStyle =
+    posterWidth && posterHeight
+      ? {
+          width: `${posterWidth}px`,
+          height: `${posterHeight}px`,
+        }
+      : undefined;
 
   return (
     <Link
       className={styles.projectCardLink}
       href={PROJECT_DETAIL_URL}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      onMouseEnter={() => {
+        setCurrentSlide(0);
+        setHovered(true);
+      }}
+      onMouseLeave={() => {
+        setCurrentSlide(0);
+        setHovered(false);
+      }}
     >
       <article
         className={hovered ? `${styles.projectCard} ${styles.projectCardHovered}` : styles.projectCard}
@@ -106,8 +143,9 @@ function ProjectCard({
                 ? styles.projectPosterPortrait
                 : styles.projectPosterLandscape
             }
+            style={posterStyle}
           >
-            {previewVideo ? (
+            {previewVideo && !hasSlideshow ? (
               <video
                 className={styles.projectVideo}
                 loop
@@ -121,16 +159,18 @@ function ProjectCard({
             ) : null}
             <Image
               alt={title}
-              className={previewVideo ? styles.projectImageWithVideo : undefined}
+              className={!hasSlideshow && previewVideo ? styles.projectImageWithVideo : undefined}
               fill
               priority={priority}
               sizes="253px"
-              src={cover}
+              src={displayedCover}
             />
           </div>
-          <div className={hovered ? `${styles.playButton} ${styles.playButtonHidden}` : styles.playButton}>
-            <span className={styles.playTriangle} />
-          </div>
+          {!hasSlideshow ? (
+            <div className={hovered ? `${styles.playButton} ${styles.playButtonHidden}` : styles.playButton}>
+              <span className={styles.playTriangle} />
+            </div>
+          ) : null}
         </div>
         <div className={styles.projectMeta}>
           <strong>{title}</strong>
@@ -272,7 +312,7 @@ function UploadPanel() {
       return fileName;
     }
 
-    return "支持 .docx 格式，可拖拽或点击此处上传";
+    return "支持 .docx 格式，可拖拽/粘贴或点击此处上传";
   }, [displayFileName, fileName, hasSelectedFile, uploadStage]);
 
   const visualStage =
@@ -328,6 +368,24 @@ function UploadPanel() {
     setHoveringDropzone(false);
     setUploadStage("uploading");
   };
+
+  useEffect(() => {
+    if (activeTab !== "upload") {
+      return;
+    }
+
+    const handlePaste = (event: ClipboardEvent) => {
+      const files = event.clipboardData?.files;
+
+      if (files?.length) {
+        event.preventDefault();
+        onFileSelect(files[0]);
+      }
+    };
+
+    window.addEventListener("paste", handlePaste);
+    return () => window.removeEventListener("paste", handlePaste);
+  }, [activeTab]);
 
   const resetUpload = () => {
     setDragging(false);
@@ -387,6 +445,14 @@ function UploadPanel() {
             }}
             onMouseEnter={() => setHoveringDropzone(true)}
             onMouseLeave={() => setHoveringDropzone(false)}
+            onPaste={(event) => {
+              const file = event.clipboardData.files?.[0];
+
+              if (file) {
+                event.preventDefault();
+                onFileSelect(file);
+              }
+            }}
             onKeyDown={(event) => {
               if (event.key === "Enter" || event.key === " ") {
                 event.preventDefault();
@@ -421,6 +487,7 @@ function UploadPanel() {
                 {uploadStage === "idle" ? (
                   <>
                     支持 .docx 格式，可拖拽或
+                    <span>/粘贴或</span>
                     <span className={styles.dropzoneUploadLink}>点击此处上传</span>
                   </>
                 ) : (
@@ -445,12 +512,19 @@ function UploadPanel() {
         )}
 
         <div className={styles.uploadFooter}>
-          <div className={styles.creditHint}>
-            <span className={styles.infoBadge}>i</span>
-            <p>
-              <strong>100</strong> 字符消耗 <strong>2</strong> 积分，实际消耗与最终输出的剧本字符相关
-            </p>
-          </div>
+          {activeTab === "upload" ? (
+            <button className={styles.stylePresetButton} type="button">
+              <span className={styles.stylePresetIcon} aria-hidden="true">
+                <Image alt="" height={28} src="/home/style-preset-icon.png" width={28} />
+              </span>
+              <span className={styles.stylePresetLabel}>风格预设</span>
+              <span className={styles.stylePresetChevron} aria-hidden="true">
+                <Image alt="" height={9} src="/home/style-preset-left-icon.svg" width={9} />
+              </span>
+            </button>
+          ) : (
+            <span className={styles.uploadFooterSpacer} aria-hidden="true" />
+          )}
           <button
             className={isAiActionDisabled ? `${styles.uploadButton} ${styles.uploadButtonDisabled}` : styles.uploadButton}
             disabled={isAiActionDisabled}
@@ -470,6 +544,15 @@ function UploadPanel() {
           tabIndex={-1}
           type="file"
         />
+      </div>
+
+      <div className={styles.uploadFootnote}>
+        <div className={styles.creditHint}>
+          <span className={styles.infoBadge}>i</span>
+          <p>
+            <strong>100</strong> 字符消耗 <strong>2</strong> 积分，实际消耗与最终输出的剧本字符相关
+          </p>
+        </div>
       </div>
     </section>
   );

@@ -285,6 +285,10 @@
   text-align: center;
 }
 
+.dropzoneArt p > span {
+  display: inline;
+}
+
 .uploadIndicator {
   flex: 0 0 auto;
 }
@@ -376,6 +380,7 @@
   display: flex;
   justify-content: space-between;
   margin-top: 16px;
+  min-height: 36px;
   padding: 0 8px 0 6px;
 }
 
@@ -405,6 +410,69 @@
   height: 14px;
   justify-content: center;
   width: 14px;
+}
+
+.stylePresetButton {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: 14px;
+  color: #111;
+  cursor: pointer;
+  display: inline-flex;
+  gap: 4px;
+  height: 36px;
+  padding: 0 10px 0 0;
+  position: relative;
+  z-index: 1;
+}
+
+.stylePresetIcon {
+  display: inline-flex;
+  height: 28px;
+  overflow: hidden;
+  position: relative;
+  width: 28px;
+}
+
+.stylePresetIcon img {
+  display: block;
+  height: 28px;
+  object-fit: contain;
+  width: 28px;
+}
+
+.stylePresetLabel {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 17px;
+}
+
+.stylePresetChevron {
+  align-items: center;
+  display: inline-flex;
+  height: 9px;
+  justify-content: center;
+  margin-left: 4px;
+  width: 9px;
+}
+
+.stylePresetChevron img {
+  display: block;
+  height: 9px;
+  object-fit: contain;
+  width: 9px;
+}
+
+.uploadFooterSpacer {
+  height: 36px;
+  width: 109px;
+}
+
+.uploadFootnote {
+  display: flex;
+  justify-content: center;
+  margin-top: 12px;
 }
 
 .uploadButton {
