@@ -300,19 +300,43 @@
   width: 72px;
 }
 
+.uploadCompletedTextVisual {
+  align-items: center;
+  display: flex;
+  height: 72px;
+  justify-content: center;
+  width: 72px;
+}
+
+.uploadCompletedTextImage {
+  display: block;
+  height: 48px;
+  object-fit: contain;
+  width: 37px;
+}
+
 .uploadResetHotspot {
+  align-items: center;
   background: rgba(255, 255, 255, 0.001);
   border: 0;
   border-radius: 999px;
   cursor: pointer;
+  display: inline-flex;
   height: 40px;
-  opacity: 0;
+  justify-content: center;
   padding: 0;
   position: absolute;
   right: -8px;
   top: -8px;
   width: 40px;
   z-index: 5;
+}
+
+.uploadResetHotspot img {
+  display: block;
+  height: 20px;
+  object-fit: contain;
+  width: 20px;
 }
 
 .dropzoneTextActive {
@@ -382,6 +406,12 @@
   margin-top: 16px;
   min-height: 36px;
   padding: 0 8px 0 6px;
+}
+
+.uploadActions {
+  align-items: center;
+  display: inline-flex;
+  gap: 8px;
 }
 
 .creditHint {
@@ -469,10 +499,154 @@
   width: 109px;
 }
 
+.pasteTextButton {
+  align-items: center;
+  background: #e9e9e9;
+  border: 0;
+  border-radius: var(--pill-radius);
+  color: #111;
+  cursor: pointer;
+  display: inline-flex;
+  height: 33px;
+  justify-content: space-between;
+  padding: 0 16px 0 20px;
+  width: 142px;
+}
+
+.pasteTextLabel {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 17px;
+}
+
+.pasteTextShortcut {
+  display: inline-flex;
+  height: 18px;
+  position: relative;
+  width: 38px;
+}
+
+.pasteTextShortcut img {
+  object-fit: contain;
+}
+
 .uploadFootnote {
   display: flex;
   justify-content: center;
   margin-top: 12px;
+}
+
+.pasteModalOverlay {
+  align-items: center;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  padding: 24px;
+  position: fixed;
+  z-index: 80;
+}
+
+.pasteModal {
+  background: #fff;
+  border-radius: 24px;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-height: 554px;
+  padding: 30px 28px 32px;
+  width: min(760px, calc(100vw - 48px));
+}
+
+.pasteModalHeader {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.pasteModalTitle {
+  color: #111;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 24px;
+  margin: 0;
+}
+
+.pasteModalClose {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: #111;
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 40px;
+  height: 32px;
+  justify-content: center;
+  line-height: 1;
+  padding: 0;
+  width: 32px;
+}
+
+.pasteModalTextarea {
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 14px;
+  box-sizing: border-box;
+  color: #111;
+  flex: 1;
+  font-family: inherit;
+  font-size: 16px;
+  line-height: 24px;
+  min-height: 400px;
+  padding: 20px 16px;
+  resize: none;
+  width: 100%;
+}
+
+.pasteModalTextarea::placeholder {
+  color: rgba(0, 0, 0, 0.26);
+}
+
+.pasteModalTextarea:focus {
+  border-color: #c5b2ff;
+  outline: none;
+}
+
+.pasteModalActions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.pasteModalSecondaryButton,
+.pasteModalPrimaryButton {
+  align-items: center;
+  border: 0;
+  border-radius: 14px;
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 16px;
+  font-weight: 500;
+  height: 44px;
+  justify-content: center;
+  min-width: 92px;
+  padding: 0 24px;
+}
+
+.pasteModalSecondaryButton {
+  background: #f0f0f0;
+  color: #111;
+}
+
+.pasteModalPrimaryButton {
+  background: #000;
+  color: #fff;
+}
+
+.pasteModalPrimaryButtonDisabled {
+  opacity: 0.4;
+  cursor: default;
 }
 
 .uploadButton {
@@ -493,8 +667,14 @@
 }
 
 .contentSection {
+  content-visibility: auto;
+  contain-intrinsic-size: 320px;
   margin: 62px auto 0;
   width: var(--content-width);
+}
+
+.deferredSectionsPlaceholder {
+  height: 1040px;
 }
 
 .sectionHeader {

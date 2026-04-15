@@ -152,7 +152,7 @@ function ProjectCard({
                 muted
                 playsInline
                 poster={cover}
-                preload="metadata"
+                preload="none"
                 ref={videoRef}
                 src={previewVideo}
               />
@@ -212,16 +212,16 @@ function FeaturedCard({ item }: { item: (typeof featuredWorks)[number] }) {
         onMouseLeave={() => setHovered(false)}
       >
         {item.previewVideo ? (
-          <video
-            className={styles.featuredVideo}
-            loop
-            muted
-            playsInline
-            poster={item.cover}
-            preload="metadata"
-            ref={videoRef}
-            src={item.previewVideo}
-          />
+        <video
+          className={styles.featuredVideo}
+          loop
+          muted
+          playsInline
+          poster={item.cover}
+          preload="none"
+          ref={videoRef}
+          src={item.previewVideo}
+        />
         ) : null}
         <Image
           alt={item.title}
@@ -286,11 +286,15 @@ function GuideCard({ item }: { item: (typeof guideCards)[number] }) {
 function UploadPanel() {
   const aiInputRef = useRef<HTMLTextAreaElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const pasteModalInputRef = useRef<HTMLTextAreaElement | null>(null);
   const [activeTab, setActiveTab] = useState<"upload" | "ai">("upload");
   const [dragging, setDragging] = useState(false);
   const [hoveringDropzone, setHoveringDropzone] = useState(false);
   const [fileName, setFileName] = useState("");
   const [aiPrompt, setAiPrompt] = useState("");
+  const [pasteModalOpen, setPasteModalOpen] = useState(false);
+  const [pasteModalText, setPasteModalText] = useState("");
+  const [uploadContentType, setUploadContentType] = useState<"file" | "text" | null>(null);
   const [animationResetKey, setAnimationResetKey] = useState(0);
   const [uploadStage, setUploadStage] = useState<"idle" | "preview" | "uploading" | "complete">(
     "idle",
@@ -305,6 +309,10 @@ function UploadPanel() {
     }
 
     if (uploadStage === "complete") {
+      if (uploadContentType === "text") {
+        return "已粘贴文本";
+      }
+
       return displayFileName || fileName;
     }
 
@@ -312,8 +320,8 @@ function UploadPanel() {
       return fileName;
     }
 
-    return "支持 .docx 格式，可拖拽/粘贴或点击此处上传";
-  }, [displayFileName, fileName, hasSelectedFile, uploadStage]);
+    return "上传 & 拖拽 .docx文件";
+  }, [displayFileName, fileName, hasSelectedFile, uploadContentType, uploadStage]);
 
   const visualStage =
     uploadStage === "uploading" || uploadStage === "complete"
@@ -358,45 +366,108 @@ function UploadPanel() {
 
   const isAiActionDisabled = activeTab === "ai" && !aiPrompt.trim();
 
+  const openPasteTextModal = (text = "") => {
+    setPasteModalText(text);
+    setPasteModalOpen(true);
+  };
+
+  const closePasteTextModal = () => {
+    setPasteModalOpen(false);
+  };
+
+  const handlePasteText = () => {
+    openPasteTextModal("");
+  };
+
   const onFileSelect = (file?: File) => {
     if (!file) {
       return;
     }
 
     setFileName(file.name);
+    setUploadContentType("file");
     setDragging(false);
     setHoveringDropzone(false);
     setUploadStage("uploading");
   };
 
   useEffect(() => {
-    if (activeTab !== "upload") {
-      return;
-    }
-
     const handlePaste = (event: ClipboardEvent) => {
+      if (pasteModalOpen && event.target === pasteModalInputRef.current) {
+        return;
+      }
+
       const files = event.clipboardData?.files;
 
-      if (files?.length) {
+      if (files?.length && activeTab === "upload") {
         event.preventDefault();
         onFileSelect(files[0]);
+        return;
+      }
+
+      const text = event.clipboardData?.getData("text/plain");
+
+      if (text?.trim()) {
+        event.preventDefault();
+        openPasteTextModal(text);
       }
     };
 
     window.addEventListener("paste", handlePaste);
     return () => window.removeEventListener("paste", handlePaste);
-  }, [activeTab]);
+  }, [activeTab, pasteModalOpen]);
+
+  useEffect(() => {
+    if (!pasteModalOpen) {
+      document.body.style.overflow = "";
+      return;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    requestAnimationFrame(() => {
+      pasteModalInputRef.current?.focus();
+    });
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        closePasteTextModal();
+      }
+    };
+
+    window.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleEscape);
+    };
+  }, [pasteModalOpen]);
 
   const resetUpload = () => {
     setDragging(false);
     setHoveringDropzone(false);
     setFileName("");
+    setUploadContentType(null);
     setUploadStage("idle");
     setAnimationResetKey((value) => value + 1);
 
     if (inputRef.current) {
       inputRef.current.value = "";
     }
+  };
+
+  const handlePasteTextComplete = () => {
+    if (!pasteModalText.trim()) {
+      pasteModalInputRef.current?.focus();
+      return;
+    }
+
+    setUploadContentType("text");
+    setFileName("");
+    setUploadStage("complete");
+    setActiveTab("upload");
+    setPasteModalOpen(false);
   };
 
   return (
@@ -464,13 +535,28 @@ function UploadPanel() {
           >
             <div className={styles.dropzoneArt}>
               <div className={styles.uploadIndicatorWrap}>
-                <UploadLottieIndicator
-                  key={animationResetKey}
-                  className={styles.uploadIndicator}
-                  onComplete={() => setUploadStage("complete")}
-                  stage={visualStage}
-                />
-                {uploadStage === "complete" ? (
+                {uploadStage === "complete" && uploadContentType === "text" ? (
+                  <div className={styles.uploadCompletedTextVisual}>
+                    <Image
+                      alt=""
+                      className={styles.uploadCompletedTextImage}
+                      height={48}
+                      src="/home/upload-complete-text-icon.png"
+                      width={37}
+                    />
+                  </div>
+                ) : (
+                  <UploadLottieIndicator
+                    key={animationResetKey}
+                    className={styles.uploadIndicator}
+                    onComplete={() => {
+                      setUploadContentType("file");
+                      setUploadStage("complete");
+                    }}
+                    stage={visualStage}
+                  />
+                )}
+                {uploadStage === "complete" && uploadContentType === "text" ? (
                   <button
                     aria-label="删除已上传文件"
                     className={styles.uploadResetHotspot}
@@ -480,15 +566,16 @@ function UploadPanel() {
                       resetUpload();
                     }}
                     type="button"
-                  />
+                  >
+                    <Image alt="" height={20} src="/home/upload-complete-close.svg" width={20} />
+                  </button>
                 ) : null}
               </div>
               <p className={uploadStage !== "idle" ? styles.dropzoneTextActive : undefined}>
                 {uploadStage === "idle" ? (
                   <>
-                    支持 .docx 格式，可拖拽或
-                    <span>/粘贴或</span>
-                    <span className={styles.dropzoneUploadLink}>点击此处上传</span>
+                    上传 & 拖拽{" "}
+                    <span className={styles.dropzoneUploadLink}>.docx文件</span>
                   </>
                 ) : (
                   helperText
@@ -512,27 +599,33 @@ function UploadPanel() {
         )}
 
         <div className={styles.uploadFooter}>
-          {activeTab === "upload" ? (
-            <button className={styles.stylePresetButton} type="button">
-              <span className={styles.stylePresetIcon} aria-hidden="true">
-                <Image alt="" height={28} src="/home/style-preset-icon.png" width={28} />
-              </span>
-              <span className={styles.stylePresetLabel}>风格预设</span>
-              <span className={styles.stylePresetChevron} aria-hidden="true">
-                <Image alt="" height={9} src="/home/style-preset-left-icon.svg" width={9} />
-              </span>
-            </button>
-          ) : (
-            <span className={styles.uploadFooterSpacer} aria-hidden="true" />
-          )}
-          <button
-            className={isAiActionDisabled ? `${styles.uploadButton} ${styles.uploadButtonDisabled}` : styles.uploadButton}
-            disabled={isAiActionDisabled}
-            onClick={handlePrimaryAction}
-            type="button"
-          >
-            {activeTab === "ai" ? "立即创作" : uploadStage === "complete" ? "立即创作" : "上传剧本"}
+          <button className={styles.stylePresetButton} type="button">
+            <span className={styles.stylePresetIcon} aria-hidden="true">
+              <Image alt="" height={28} src="/home/style-preset-icon.png" width={28} />
+            </span>
+            <span className={styles.stylePresetLabel}>风格预设</span>
+            <span className={styles.stylePresetChevron} aria-hidden="true">
+              <Image alt="" height={9} src="/home/style-preset-left-icon.svg" width={9} />
+            </span>
           </button>
+          <div className={styles.uploadActions}>
+            {activeTab === "upload" && uploadStage !== "complete" ? (
+              <button className={styles.pasteTextButton} onClick={handlePasteText} type="button">
+                <span className={styles.pasteTextLabel}>粘贴文本</span>
+                <span className={styles.pasteTextShortcut} aria-hidden="true">
+                  <Image alt="" fill sizes="38px" src="/home/paste-text-shortcut.svg" />
+                </span>
+              </button>
+            ) : null}
+            <button
+              className={isAiActionDisabled ? `${styles.uploadButton} ${styles.uploadButtonDisabled}` : styles.uploadButton}
+              disabled={isAiActionDisabled}
+              onClick={handlePrimaryAction}
+              type="button"
+            >
+              {activeTab === "ai" ? "立即创作" : uploadStage === "complete" ? "立即创作" : "上传剧本"}
+            </button>
+          </div>
         </div>
 
         <input
@@ -554,6 +647,55 @@ function UploadPanel() {
           </p>
         </div>
       </div>
+
+      {pasteModalOpen ? (
+        <div className={styles.pasteModalOverlay} role="presentation">
+          <div
+            aria-labelledby="paste-text-modal-title"
+            aria-modal="true"
+            className={styles.pasteModal}
+            role="dialog"
+          >
+            <div className={styles.pasteModalHeader}>
+              <h3 className={styles.pasteModalTitle} id="paste-text-modal-title">
+                粘贴文本
+              </h3>
+              <button
+                aria-label="关闭粘贴文本弹窗"
+                className={styles.pasteModalClose}
+                onClick={closePasteTextModal}
+                type="button"
+              >
+                ×
+              </button>
+            </div>
+            <textarea
+              className={styles.pasteModalTextarea}
+              onChange={(event) => setPasteModalText(event.target.value)}
+              placeholder="请在此处粘贴你的剧本……"
+              ref={pasteModalInputRef}
+              value={pasteModalText}
+            />
+            <div className={styles.pasteModalActions}>
+              <button className={styles.pasteModalSecondaryButton} onClick={closePasteTextModal} type="button">
+                取消
+              </button>
+              <button
+                className={
+                  pasteModalText.trim()
+                    ? styles.pasteModalPrimaryButton
+                    : `${styles.pasteModalPrimaryButton} ${styles.pasteModalPrimaryButtonDisabled}`
+                }
+                disabled={!pasteModalText.trim()}
+                onClick={handlePasteTextComplete}
+                type="button"
+              >
+                完成
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }
@@ -561,6 +703,35 @@ function UploadPanel() {
 export function HomePage() {
   const featuredRef = useRef<HTMLDivElement | null>(null);
   const guideRef = useRef<HTMLDivElement | null>(null);
+  const [showDeferredSections, setShowDeferredSections] = useState(false);
+
+  useEffect(() => {
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    let idleId: number | undefined;
+    const revealSections = () => setShowDeferredSections(true);
+
+    const idleWindow = window as Window &
+      typeof globalThis & {
+        requestIdleCallback?: (callback: IdleRequestCallback, options?: IdleRequestOptions) => number;
+        cancelIdleCallback?: (handle: number) => void;
+      };
+
+    if (typeof idleWindow.requestIdleCallback === "function") {
+      idleId = idleWindow.requestIdleCallback(revealSections, { timeout: 400 });
+    } else {
+      timeoutId = globalThis.setTimeout(revealSections, 120);
+    }
+
+    return () => {
+      if (idleId !== undefined && typeof idleWindow.cancelIdleCallback === "function") {
+        idleWindow.cancelIdleCallback(idleId);
+      }
+
+      if (timeoutId !== undefined) {
+        globalThis.clearTimeout(timeoutId);
+      }
+    };
+  }, []);
 
   const scrollRow = (ref: React.RefObject<HTMLDivElement | null>, direction: number) => {
     ref.current?.scrollBy({
@@ -619,59 +790,65 @@ export function HomePage() {
           <UploadPanel />
         </section>
 
-        <section className={styles.contentSection}>
-          <SectionHeader title="我的项目" />
-          <div className={styles.projectGrid}>
-            {projectCards.map((item) => (
-              <ProjectCard
-                key={`${item.title}-${item.createdAt}-${item.cover}`}
-                priority={item.cover === "/home/project-1.svg"}
-                {...item}
-              />
-            ))}
-          </div>
-        </section>
+        {showDeferredSections ? (
+          <>
+            <section className={styles.contentSection}>
+              <SectionHeader title="我的项目" />
+              <div className={styles.projectGrid}>
+                {projectCards.map((item, index) => (
+                  <ProjectCard
+                    key={`${item.title}-${item.createdAt}-${item.cover}`}
+                    priority={index < 2}
+                    {...item}
+                  />
+                ))}
+              </div>
+            </section>
 
-        <section className={styles.contentSection}>
-          <SectionHeader
-            actions={
-              <ScrollButtons
-                compact
-                onNext={() => scrollRow(featuredRef, 1)}
-                onPrev={() => scrollRow(featuredRef, -1)}
+            <section className={styles.contentSection}>
+              <SectionHeader
+                actions={
+                  <ScrollButtons
+                    compact
+                    onNext={() => scrollRow(featuredRef, 1)}
+                    onPrev={() => scrollRow(featuredRef, -1)}
+                  />
+                }
+                showFilter={false}
+                title="爆款作品"
               />
-            }
-            showFilter={false}
-            title="爆款作品"
-          />
-          <div className={styles.scrollViewport} ref={featuredRef}>
-            <div className={styles.featuredRow}>
-              {featuredWorks.map((item) => (
-                <FeaturedCard item={item} key={`${item.title}-${item.cover}`} />
-              ))}
-            </div>
-          </div>
-        </section>
+              <div className={styles.scrollViewport} ref={featuredRef}>
+                <div className={styles.featuredRow}>
+                  {featuredWorks.map((item) => (
+                    <FeaturedCard item={item} key={`${item.title}-${item.cover}`} />
+                  ))}
+                </div>
+              </div>
+            </section>
 
-        <section className={styles.contentSection}>
-          <SectionHeader
-            actions={
-              <ScrollButtons
-                onNext={() => scrollRow(guideRef, 1)}
-                onPrev={() => scrollRow(guideRef, -1)}
+            <section className={styles.contentSection}>
+              <SectionHeader
+                actions={
+                  <ScrollButtons
+                    onNext={() => scrollRow(guideRef, 1)}
+                    onPrev={() => scrollRow(guideRef, -1)}
+                  />
+                }
+                showFilter={false}
+                title="教学引导"
               />
-            }
-            showFilter={false}
-            title="教学引导"
-          />
-          <div className={styles.scrollViewport} ref={guideRef}>
-            <div className={styles.guideRow}>
-              {guideCards.map((item) => (
-                <GuideCard item={item} key={`${item.author}-${item.cover}`} />
-              ))}
-            </div>
-          </div>
-        </section>
+              <div className={styles.scrollViewport} ref={guideRef}>
+                <div className={styles.guideRow}>
+                  {guideCards.map((item) => (
+                    <GuideCard item={item} key={`${item.author}-${item.cover}`} />
+                  ))}
+                </div>
+              </div>
+            </section>
+          </>
+        ) : (
+          <div className={styles.deferredSectionsPlaceholder} aria-hidden="true" />
+        )}
       </div>
     </main>
   );
