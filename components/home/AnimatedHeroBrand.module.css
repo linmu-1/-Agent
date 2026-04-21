@@ -1,13 +1,17 @@
 .brand {
   display: inline-flex;
-  height: 120px;
+  height: 65px;
   justify-content: center;
-  width: 343px;
+  width: 268px;
 }
 
-.compositeImage {
+.animationLayer {
+  height: 65px;
+  width: 268px;
+}
+
+.animationLayer :global(svg) {
   display: block;
-  height: 120px;
-  object-fit: contain;
-  width: 343px;
+  height: 65px !important;
+  width: 268px !important;
 }

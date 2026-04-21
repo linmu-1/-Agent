@@ -472,29 +472,32 @@ function UploadPanel() {
 
   return (
     <section className={styles.uploadWrap}>
-      <div className={styles.uploadShell}>
-        <div className={styles.uploadTabsLayer}>
-          <div className={styles.uploadTabRail}>
-            <button
-              className={activeTab === "upload" ? styles.uploadTabActive : styles.uploadTabInactive}
-              onClick={() => setActiveTab("upload")}
-              type="button"
-            >
-              <Image alt="" height={16} src="/home/upload-script.svg" width={16} />
-              上传剧本
-            </button>
-            <button
-              className={activeTab === "ai" ? styles.uploadTabActive : styles.uploadTabInactive}
-              onClick={() => setActiveTab("ai")}
-              type="button"
-            >
-              <Image alt="" height={16} src="/home/upload-ai.svg" width={16} />
-              AI 生成剧本
-            </button>
-          </div>
-        </div>
+      <div className={styles.uploadTabsLayer}>
+        <button
+          className={activeTab === "upload" ? styles.uploadTabPrimaryActive : styles.uploadTabPrimary}
+          onClick={() => setActiveTab("upload")}
+          type="button"
+        >
+          <Image alt="" height={16} src="/home/upload-script.svg" width={16} />
+          上传剧本
+        </button>
+        <button
+          className={activeTab === "ai" ? styles.uploadTabSecondaryActive : styles.uploadTabSecondary}
+          onClick={() => setActiveTab("ai")}
+          type="button"
+        >
+          <Image alt="" height={16} src="/home/upload-ai.svg" width={16} />
+          AI 生成剧本
+        </button>
+      </div>
 
-        <div className={styles.uploadCard}>
+      <div
+        className={
+          activeTab === "upload"
+            ? `${styles.uploadCard} ${styles.uploadCardUploadActive}`
+            : `${styles.uploadCard} ${styles.uploadCardAiActive}`
+        }
+      >
         {activeTab === "upload" ? (
           <div
             aria-label="上传剧本"
@@ -596,26 +599,15 @@ function UploadPanel() {
         )}
 
         <div className={styles.uploadFooter}>
-          <div className={styles.uploadFooterLeft}>
-            <button className={styles.stylePresetButton} type="button">
-              <span className={styles.stylePresetIcon} aria-hidden="true">
-                <Image alt="" height={28} src="/home/style-preset-icon.png" width={28} />
-              </span>
-              <span className={styles.stylePresetLabel}>风格预设</span>
-              <span className={styles.stylePresetChevron} aria-hidden="true">
-                <Image alt="" height={9} src="/home/style-preset-left-icon.svg" width={9} />
-              </span>
-            </button>
-            <button className={styles.ratioButton} type="button">
-              <span className={styles.ratioIcon} aria-hidden="true">
-                <Image alt="" height={28} src="/home/ratio-icon.png" width={28} />
-              </span>
-              <span className={styles.ratioLabel}>比例</span>
-              <span className={styles.ratioChevron} aria-hidden="true">
-                <Image alt="" height={9} src="/home/style-preset-left-icon.svg" width={9} />
-              </span>
-            </button>
-          </div>
+          <button className={styles.stylePresetButton} type="button">
+            <span className={styles.stylePresetIcon} aria-hidden="true">
+              <Image alt="" height={28} src="/home/style-preset-icon.png" width={28} />
+            </span>
+            <span className={styles.stylePresetLabel}>风格预设</span>
+            <span className={styles.stylePresetChevron} aria-hidden="true">
+              <Image alt="" height={9} src="/home/style-preset-left-icon.svg" width={9} />
+            </span>
+          </button>
           <div className={styles.uploadActions}>
             {activeTab === "upload" && uploadStage !== "complete" ? (
               <button className={styles.pasteTextButton} onClick={handlePasteText} type="button">
@@ -631,14 +623,7 @@ function UploadPanel() {
               onClick={handlePrimaryAction}
               type="button"
             >
-              {activeTab === "ai" || uploadStage === "complete" ? (
-                "立即创作"
-              ) : (
-                <>
-                  <span className={styles.uploadButtonPlus} aria-hidden="true" />
-                  上传剧本
-                </>
-              )}
+              {activeTab === "ai" ? "立即创作" : uploadStage === "complete" ? "立即创作" : "上传剧本"}
             </button>
           </div>
         </div>
@@ -652,7 +637,6 @@ function UploadPanel() {
           tabIndex={-1}
           type="file"
         />
-      </div>
       </div>
 
       <div className={styles.uploadFootnote}>
@@ -759,96 +743,51 @@ export function HomePage() {
   return (
     <main className={styles.page}>
       <div className={styles.canvas}>
-        <section className={styles.heroStage}>
-          <div className={styles.heroMedia} aria-hidden="true">
-            <video
-              autoPlay
-              className={styles.heroMediaVideo}
-              loop
-              muted
-              playsInline
-              poster="/home/featured-5.png"
-              preload="auto"
-              src="/home/hero-stage-video.mov"
-            />
-            <div className={styles.heroMediaFade}>
-              <video
-                autoPlay
-                className={`${styles.heroMediaBlurVideo} ${styles.heroMediaBlurBandOne}`}
-                loop
-                muted
-                playsInline
-                poster="/home/featured-5.png"
-                preload="auto"
-                src="/home/hero-stage-video.mov"
-              />
-              <video
-                autoPlay
-                className={`${styles.heroMediaBlurVideo} ${styles.heroMediaBlurBandTwo}`}
-                loop
-                muted
-                playsInline
-                poster="/home/featured-5.png"
-                preload="auto"
-                src="/home/hero-stage-video.mov"
-              />
-              <video
-                autoPlay
-                className={`${styles.heroMediaBlurVideo} ${styles.heroMediaBlurBandThree}`}
-                loop
-                muted
-                playsInline
-                poster="/home/featured-5.png"
-                preload="auto"
-                src="/home/hero-stage-video.mov"
-              />
-              <video
-                autoPlay
-                className={`${styles.heroMediaBlurVideo} ${styles.heroMediaBlurBandFour}`}
-                loop
-                muted
-                playsInline
-                poster="/home/featured-5.png"
-                preload="auto"
-                src="/home/hero-stage-video.mov"
-              />
-              <div className={styles.heroMediaFadeTint} />
-            </div>
-          </div>
+        <header className={styles.topNav}>
+          <button
+            aria-label="刷新页面"
+            className={styles.topNavBrandButton}
+            onClick={() => window.location.reload()}
+            type="button"
+          >
+            <Image alt="短剧 Agent" height={28} src="/home/top-nav-brand.svg" width={82} />
+          </button>
 
-          <header className={styles.topNav}>
-            <button
-              aria-label="刷新页面"
-              className={styles.topNavBrandButton}
-              onClick={() => window.location.reload()}
-              type="button"
-            >
-              <Image alt="短剧 Agent" height={28} src="/home/top-nav-logo-white.svg" width={82} />
+          <div className={styles.topNavRight}>
+            <button className={styles.creditPill} type="button">
+              <span className={styles.creditCount}>+ 200</span>
+              <span className={styles.creditLabel}>积分</span>
             </button>
-
-            <div className={styles.topNavRight}>
-              <button className={styles.creditPill} type="button">
-                <span className={styles.creditCount}>+ 200</span>
-                <span className={styles.creditLabel}>积分</span>
-              </button>
-              <button aria-label="通知" className={styles.navIconButton} type="button">
-                <Image alt="" className={styles.navIconImage} height={24} src="/home/nav-bell.svg" width={24} />
-              </button>
-              <button aria-label="帮助" className={styles.navIconButton} type="button">
-                <Image alt="" className={styles.navIconImage} height={24} src="/home/nav-help.svg" width={24} />
-              </button>
-              <button aria-label="个人中心" className={styles.avatarButton} type="button">
-                <Image alt="" className={styles.avatarImage} height={28} src="/home/nav-avatar.png" width={28} />
-              </button>
-            </div>
-          </header>
-
-          <div className={styles.heroStageContent}>
-            <section className={styles.hero}>
-              <AnimatedHeroBrand />
-              <UploadPanel />
-            </section>
+            <button aria-label="通知" className={styles.navIconButton} type="button">
+              <Image alt="" height={24} src="/home/nav-bell.svg" width={24} />
+            </button>
+            <button aria-label="帮助" className={styles.navIconButton} type="button">
+              <Image alt="" height={24} src="/home/nav-help.svg" width={24} />
+            </button>
+            <button aria-label="个人中心" className={styles.avatarButton} type="button">
+              <Image alt="" className={styles.avatarImage} height={28} src="/home/nav-avatar.png" width={28} />
+            </button>
           </div>
+        </header>
+
+        <section className={styles.hero}>
+          <AnimatedHeroBrand />
+          <p className={styles.heroSubtitle}>
+            全面应用{" "}
+            <span className={styles.seedanceWrap}>
+              <span className="serif">Seedance 2.0</span>
+              <Image
+                alt=""
+                aria-hidden="true"
+                className={styles.seedanceRing}
+                height={24}
+                src="/home/seedance-ring.svg"
+                width={112}
+              />
+            </span>{" "}
+            模型，一键直出整部剧！
+          </p>
+          <UploadPanel />
         </section>
 
         {showDeferredSections ? (
